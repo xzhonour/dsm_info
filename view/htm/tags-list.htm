@@ -1,0 +1,131 @@
+<?php include APP_PATH.'view/htm/header.inc.htm'; ?>
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            <i class="fa fa-list-ol"></i>
+            标签列表
+        </h1>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <!-- /.row -->
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title"></h3>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover" id="gtreetable">
+                           <thead>
+                               <tr>
+                                   <th>标签名</th>
+                                   <th>信息</th>
+                                   <th>排序</th>
+                                   <th>操作</th>
+                               </tr>
+                               <tr>
+                                   <td colspan="5">
+                                       <a href="<?php echo url('tags-add'); ?>" class="btn btn-success">添加标签</a>
+                                   </td>
+                               </tr>
+                           </thead>
+                           <tbody>
+                           <?php $i=0; foreach($tags as $v): ?>
+                               <tr data-tt-id="<?php echo $v['tid']; ?>" data-tt-branch='true'>
+                                   <td style="cursor: pointer;"><?php echo $v['name']; ?></td>
+                                   <td><?php echo $v['info']; ?></td>
+                                   <td><?php echo $v['sort']; ?></td>
+                                   <td>
+                                       <a href="<?php echo url('tags-edit-'.$v['tid']); ?>" class="btn btn-warning btn-sm">修改</a>
+                                       <?php if($v['level'] != 4): ?>
+                                       <a href="<?php echo url('tags-add-'.$v['tid']); ?>" class="btn btn-success btn-sm">添加子标签</a>
+                                       <?php endif; ?>
+                                       <a href="javascript:;" data-url="<?php echo url('tags-delete-'.$v['tid']); ?>"  class="btn delete-tag btn-danger btn-sm">删除</a>
+                                   </td>
+                               </tr>
+                           <?php endforeach; ?>
+                           </tbody>
+
+                        </table>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+</div>
+<style>
+    #gtreetable tbody tr.selected{background: #0b58a2;color: #ffffff;}
+</style>
+<script>
+    $(function ($) {
+        $.require_css('<?php echo $conf["view_url"]; ?>bower_components/treetable/css/jquery.treetable.css')
+        $.require('<?php echo $conf["view_url"]; ?>bower_components/treetable/jquery.treetable.js',function () {
+            var url_rewrite_on = <?php echo $conf['url_rewrite_on']; ?>;
+            $("#gtreetable").treetable({
+                expandable: true,
+                expanderTemplate:'<a href="#">&nbsp;<i class="fa  fa-plus-square"></i> </a>',
+                stringCollapse:'关闭',
+                stringExpand:'展开',
+                clickableNodeNames:true,
+                onNodeExpand:function () {
+                    var url = (url_rewrite_on?'':'?')+'tags-list-'+this.id+'.htm';
+                    var parent_id = this.id;
+                    var parentNode = $("#gtreetable").treetable("node", parent_id);
+                    $.xpost(url,{tid:this.id},function (code,message) {
+                        if (xn.empty(message)) return;
+                        for (var i = 0;i < message.length;i++){
+                            var node = message[i];
+                            if (!$("#gtreetable").treetable("node", node['tid'])){
+                                var row ='<tr style="cursor: pointer;" data-tt-id="' + node['tid'] + '" data-tt-branch="true" '+' data-tt-parent-id="'+parent_id+'"';
+                                    row += ' >';
+                                    row += '<td>'+node['name']+'</td>';
+                                    row += '<td>'+(xn.empty(node['info'])?'':node['info'])+'</td>';
+                                    row += '<td>'+node['sort']+'</td>';
+                                    row += '<td>'
+                                    row += '<a href="'+(url_rewrite_on?'':'?')+'tags-edit-'+node['tid']+'.htm" class="btn btn-warning btn-sm">修改</a> ';
+                                    if(node['level'] !=4){
+                                        row += '<a href="'+(url_rewrite_on?'':'?')+'tags-add-'+node['tid']+'.htm" class="btn btn-success btn-sm">添加子标签</a> ';
+                                    }
+                                    row += '<a href="'+(url_rewrite_on?'':'?')+'tags-del-'+node['tid']+'.htm" class="btn btn-danger btn-sm">删除</a>';
+                                    row += '</td>';
+                                    row +="</tr>";
+                                $("#gtreetable").treetable("loadBranch", parentNode, row);
+                            }
+                        }
+                    });
+                }
+            });
+            $("#gtreetable tbody").on("mousedown", "tr", function() {
+                $(".selected").not(this).removeClass("selected");
+                $(this).toggleClass("selected");
+            });
+            $('#gtreetable').on('click','td',function () {
+                var i = $(this).find('i.fa');
+                i.hasClass('fa-plus-square')?i.removeClass('fa-plus-square').addClass('fa-minus-square'):i.removeClass('fa-minus-square').addClass('fa-plus-square');
+            });
+        });
+        $('.delete-tag').on('click',function () {
+            if(confirm('你确定要删除吗？')){
+                var action = $(this).data('url');
+                $.xpost(action, {}, function(code, message) {
+                    if(code == 0) {
+                        alert(message);
+                        window.location.reload();
+                    } else {
+                        alert(message);
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+<?php include APP_PATH.'view/htm/footer.inc.htm'; ?>

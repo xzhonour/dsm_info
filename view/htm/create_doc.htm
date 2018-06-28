@@ -1,0 +1,125 @@
+<?php include APP_PATH.'view/htm/header.inc.htm'; ?>
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            我的文档
+        </h1>
+        <!--<ol class="breadcrumb">-->
+        <!--<li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>-->
+        <!--<li class="active">Dashboard</li>-->
+        <!--</ol>-->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+
+        <!-- Main row -->
+        <div class="row">
+            <!-- Left col -->
+            <section class="col-lg-12 connectedSortable">
+                <!-- quick email widget -->
+                <div class="box box-info">
+                    <div class="box-header">
+                        <i class="fa  fa-folder"></i>
+
+                        <h3 class="box-title">新建文档</h3>
+                    </div>
+                    <div class="box-body">
+                        <form action="<?php echo url('index-doc'); ?>" method="post" id="form">
+                            <div class="form-group">
+                                <input type="text" class="form-control" name="doc_name" placeholder="请输入文档名称">
+                            </div>
+                            <div class="box-footer clearfix">
+                                <button type="submit" id="submit" class="pull-right btn btn-default" id="step1">下一步
+                                    <i class="fa fa-arrow-circle-right"></i></button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <?php if(!empty($w)): ?>
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">搜索关键词 "<?php echo $w; ?>" 的结果</h3>
+                    </div>
+                    <?php if(!empty($my_doc)): ?>
+                    <!-- /.box-header -->
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover">
+                            <tbody>
+                            <tr>
+                                <th>文档名</th>
+                                <th>最后更新时间</th>
+                                <th>创建时间</th>
+                                <th>操作</th>
+                            </tr>
+                            <?php foreach($my_doc as $v): ?>
+                            <tr>
+                                <td><?php echo $v['doc_name']; ?></td>
+                                <td><?php echo date('Y-m-d H:i',$v['update_time']); ?></td>
+                                <td><?php echo date('Y-m-d H:i',$v['create_time']); ?></td>
+                                <td>
+                                    <a href="<?php echo url('index-doc_step',['did'=>$v['did']]); ?>" class="btn btn-success">查看</a>
+                                    <?php if($gid <= $gid_default || $gid >= 0): ?>
+                                    <a href="javascript:;" data-url="<?php echo url('index-delete-'.$v['did']); ?>" class="btn delete-doc btn-danger">删除</a>
+                                    <?php  endif; ?>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                            </tbody></table>
+                    </div>
+                    <!-- /.box-body -->
+
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+            </section>
+            <!-- /.Left col -->
+        </div>
+        <!-- /.row (main row) -->
+
+    </section>
+    <!-- /.content -->
+</div>
+<script>
+    $(function ($) {
+        var login_form = $('#form');
+        var submit = $('#submit');
+        var url_rewrite_on = <?php echo $conf['url_rewrite_on']; ?>;
+        $.require('<?php echo $conf["view_url"]; ?>bower_components/xiuno/form.js',function () {
+            login_form.on('submit',function () {
+                login_form.reset();
+                submit.button('loading');
+                var postdata = login_form.serializeObject();
+                $.xpost(login_form.attr('action'), postdata, function(code, message,s) {
+                    if(code == 0) {
+                        var referer = (url_rewrite_on?'':'?')+'index-doc_step-1-'+s.did+'.htm';
+                        submit.button(message).delay(1000).location(referer);
+                    } else if(xn.is_number(code)) {
+                        alert(message);
+                        submit.button('reset');
+                    } else {
+                        login_form.find('[name="'+code+'"]').alert(message).focus();
+                        submit.button('reset');
+                    }
+                });
+                return false;
+            });
+            $('.delete-doc').on('click',function () {
+                if(confirm('你确定要删除吗？')){
+                    var action = $(this).data('url');
+                    $.xpost(action, {}, function(code, message) {
+                        if(code == 0) {
+                            alert(message);
+                            window.location.reload();
+                        } else {
+                            alert(message);
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>
+<?php include APP_PATH.'view/htm/footer.inc.htm'; ?>

@@ -1,0 +1,102 @@
+<?php include APP_PATH.'view/htm/header.inc.htm'; ?>
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            用户信息
+        </h1>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="row">
+            <!-- left column -->
+            <div class="col-md-12">
+                <!-- general form elements -->
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">添加用户</h3>
+                    </div>
+                    <!-- /.box-header -->
+                    <!-- form start -->
+                    <form role="form" id="form" method="post" action="<?php echo url('user-add'); ?>">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label for="username"><span class="text-red">* </span>用户名</label>
+                                <input type="text" class="form-control" id="username" name="username" placeholder="请输入你的用户名">
+                            </div>
+                            <div class="form-group">
+                                <label for="gid"><span class="text-red">* </span>用户组</label>
+                                <select name="gid" class="form-control" id="gid">
+                                    <?php foreach($conf['groups'] as $k=>$v): ?>
+                                    <option value="<?php echo $k; ?>" ><?php echo $v; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="password">密码</label>
+                                <input type="password" class="form-control" id="password" name="password" placeholder="请输入你的密码">
+                            </div>
+                            <div class="form-group">
+                                <label for="password2">确认密码</label>
+                                <input type="password" class="form-control" id="password2" name="password2" placeholder="请输入确认密码">
+                            </div>
+                            <div class="form-group">
+                                <label for="mobile">手机号</label>
+                                <input type="text" class="form-control" id="mobile" name="mobile" placeholder="请输入手机号">
+                            </div>
+                            <div class="form-group">
+                                <label for="qq">QQ</label>
+                                <input type="text" class="form-control" id="qq" name="qq" placeholder="请输入QQ号">
+                            </div>
+                            <div class="form-group">
+                                <label for="realname">真实姓名</label>
+                                <input type="text" class="form-control" name="realname" id="realname" placeholder="请输入你的真实姓名">
+                            </div>
+                            <div class="form-group">
+                                <label for="idnumber">身份证号码</label>
+                                <input type="text" class="form-control" id="idnumber" name="idnumber" placeholder="请输入身份证号码">
+                            </div>
+                        </div>
+                        <!-- /.box-body -->
+
+                        <div class="box-footer">
+                            <button type="submit" id="submit" class="btn btn-primary">添加</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- /.box -->
+            </div>
+        </div>
+        <!-- /.row -->
+    </section>
+    <!-- /.content -->
+</div>
+<script>
+    $(function ($) {
+        var login_form = $('#form');
+        var submit = $('#submit');
+        var referer = '/<?php echo url("user-list"); ?>';
+        $.require('<?php echo $conf["view_url"]; ?>bower_components/xiuno/form.js',function () {
+            login_form.on('submit',function () {
+                login_form.reset();
+                submit.button('loading');
+                var postdata = login_form.serializeObject();
+                $.xpost(login_form.attr('action'), postdata, function(code, message) {
+                    if(code == 0) {
+                        console.log(message);
+                        submit.button(message).delay(1000).location(referer);
+                    } else if(xn.is_number(code)) {
+                        alert(message);
+                        submit.button('reset');
+                    } else {
+                        login_form.find('[name="'+code+'"]').alert(message).focus();
+                        submit.button('reset');
+                    }
+                });
+                return false;
+            });
+        });
+    });
+</script>
+<?php include APP_PATH.'view/htm/footer.inc.htm'; ?>

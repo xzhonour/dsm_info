@@ -1,0 +1,200 @@
+<?php include APP_PATH.'view/htm/header.inc.htm'; ?>
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            我的文档
+        </h1>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+
+        <!-- Main row -->
+        <div class="row">
+            <!-- Left col -->
+            <section class="col-lg-12 connectedSortable">
+                <div class="box box-info">
+                    <div class="box-header">
+                        <i class="fa  fa-folder"></i>
+
+                        <h3 class="box-title">新建文档</h3>
+                    </div>
+                    <div class="box-body pad table-responsive">
+                        <table class="table table-bordered text-center">
+                            <thead>
+                                <tr>
+                                    <th colspan="6"><?php echo $doc['doc_name']; ?></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <?php if(!empty($history_tags)):?>
+                            <tr>
+                                <th colspan="5" width="80%">
+                                    <?php  foreach($history_tags as $v): ?>
+                                    <div class="col-sm-3">
+                                        <a href="javascript:;" style="background: <?php echo $v['color']; ?>;" color="<?php echo $v['color']; ?>" class="btn btn-block reversal btn-lg"><?php echo $v['name']; ?></a>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </th>
+                                <th>
+                                    <?php if($step == 4 && ($gid == $gid_default OR $gid == 0) && !empty($docs_route)): ?>
+                                        <a href="<?php echo url('index-print_to_word-'.$did); ?>" class="btn btn-block  btn-lg btn-warning">打印文档</a>
+                                    <?php endif; ?>
+                                </th>
+                            </tr>
+                            <?php endif; ?>
+
+                            <?php if(!empty($tags) && $step < 4):?>
+                            <tr>
+                                    <td colspan="6">
+                                        <?php $i=1;   foreach($tags as $v):  ?>
+                                            <div class="col-sm-2">
+                                                <a href="<?php echo url('index-doc_step-'.($step+1).'-'.$did.'-'.$v['tid']); ?>" style="background: <?php echo $v['color']; ?>;" color="<?php echo $v['color']; ?>" class="btn btn-block reversal"><?php echo $v['name']; ?></a>
+                                            </div>
+                                            <?php if(!($i % 6)): ?>
+                                                    <div class="col-sm-12"><hr></div>
+                                            <?php endif; $i++; ?>
+
+                                        <?php endforeach;  ?>
+                                    </td>
+                            </tr>
+
+                            <?php endif; ?>
+                            <?php if($step > 1 && $step < 4): ?>
+                            <tr>
+                                <td colspan="6">
+                                    <!--<a href="<?php echo url('index-doc_step-'.($step-1).'-'.$did.'-'.(isset($doc['step'.($step-2)])?$doc['step'.($step-2)]:0)); ?>"   class="btn btn-danger" >返回</a>-->
+                                    <a href="<?php echo url('index-doc_step-'.$level.'-'.$did.'-'.(isset($did_now['tag_'.($level-1)])?$did_now['tag_'.($level-1)]:0)); ?>"  class="btn btn-danger" >返回</a>
+                                </td>
+                            </tr>
+                            <?php endif; ?>
+                            <?php if($step == 4): ?>
+                                <form action="<?php echo url('index-save_content-'.$did);  ?>"  id="form" method="post">
+                                    <?php if(!empty($tags)):?>
+                                    <tr>
+                                        <td colspan="6" style="text-align: left;">
+                                            <?php foreach($tags as $v): ?>
+                                            <input type="checkbox" <?php echo in_array($v['tid'],$four_tags)?'checked':''; ?> name="four_tags[]" value="<?php echo $v['tid']; ?>"> <button type="button" style="background: <?php echo $v['color']; ?>;" color="<?php echo $v['color']; ?>" class="btn reversal"><?php echo $v['name']; ?></button>
+                                            <?php endforeach; ?>
+                                        </td>
+                                    </tr>
+                                    <?php endif; ?>
+                                    <tr>
+                                        <td colspan="6">
+                                            <table class="table">
+                                                <tr>
+                                                    <td style="width: <?php echo !empty($docs_route)?50:100; ?>%">
+                                                        <textarea name="content" maxlength="50" rows="10" class="form-control" ><?php echo empty($docs_route_now['content'])?'':$docs_route_now['content']; ?></textarea>
+                                                    </td>
+                                                    <?php if(!empty($docs_route)): ?>
+                                                    <td >
+                                                        <table class="table table-hover">
+                                                            <tr>
+                                                                <td style="text-align: left;"><lable class="label label-danger">已选择的标签:</lable></td>
+                                                                <th>操作</th>
+                                                            </tr>
+                                                            <?php foreach($docs_route as $v): ?>
+                                                            <tr>
+                                                                <td style="text-align: left;">
+                                                                    <button type="button" style="background: <?php echo $v['tag_1_color']; ?>;" color="<?php echo $v['tag_1_color']; ?>" class="btn btn-sm reversal" > <?php echo $v['tag_1_name']; ?></button>  <i class="fa fa-angle-double-right"></i>
+                                                                    <button type="button" style="background: <?php echo $v['tag_2_color']; ?>;" color="<?php echo $v['tag_2_color']; ?>" class="btn btn-sm reversal" > <?php echo $v['tag_2_name']; ?></button>  <i class="fa fa-angle-double-right"></i>
+                                                                    <button type="button" style="background: <?php echo $v['tag_3_color']; ?>;" color="<?php echo $v['tag_3_color']; ?>" class="btn btn-sm reversal" > <?php echo $v['tag_3_name']; ?></button>
+                                                                    <?php if($docs_route_now['rid'] == $v['rid']): ?>
+                                                                        <span class="label label-primary">当前</span>
+                                                                    <?php endif; ?>
+                                                                </td>
+                                                                <td>
+                                                                    <?php if($docs_route_now['rid'] != $v['rid']): ?>
+                                                                        <a href="javascript:;" data-url="<?php echo url('index-delete_route-'.$v['rid']); ?>"  class="btn btn-danger btn-sm delete-route">删除</a>
+                                                                        <a href="<?php echo url('index-doc_step',['did'=>$v['did'],'rid'=>$v['rid']]); ?>"  class="btn btn-success btn-sm">查看</a>
+                                                                    <?php endif; ?>
+                                                                </td>
+                                                            </tr>
+                                                            <?php endforeach; ?>
+                                                        </table>
+                                                    </td>
+                                                    <?php endif; ?>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="6">
+                                            <input type="submit" id="submit" class="btn btn-success" value="保存">
+                                            <a href="<?php echo url('index-doc_step-'.$level.'-'.$did.'-'.(isset($did_now['tag_'.($level-1)])?$did_now['tag_'.($level-1)]:0)); ?>"  class="btn btn-danger" >返回</a>
+                                            <input type="button" onclick="location.reload();" class="btn btn-warning" value="刷新">
+                                        </td>
+                                    </tr>
+                                </form>
+                            <?php endif; ?>
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+            </section>
+            <!-- /.Left col -->
+        </div>
+        <!-- /.row (main row) -->
+
+    </section>
+    <!-- /.content -->
+</div>
+<script>
+    $(function ($) {
+        $('.btn.reversal').each(function (k,v) {
+                var color = $(v).attr('color');
+                color = color.replace('#','');
+                var c16,c10,max16=15,b=[];
+                for(var i=0;i<color.length;i++){
+                    c16=parseInt(color.charAt(i),16);//  to 16进制
+                    c10=parseInt(max16-c16,10);// 10进制计算
+                    b.push(c10.toString(16)); // to 16进制
+                }
+                $(v).css('color','#'+b.join(''));
+        });
+        var login_form = $('#form');
+        var submit = $('#submit');
+        var url_rewrite_on = <?php echo $conf['url_rewrite_on']; ?>;
+        $.require('<?php echo $conf["view_url"]; ?>bower_components/xiuno/form.js',function () {
+            login_form.on('submit',function () {
+                login_form.reset();
+                // submit.button('loading');
+                var postdata = login_form.serializeObject();
+                $.xpost(login_form.attr('action'), postdata, function(code, message,s) {
+                    if(code == 0) {
+                        submit.button(message).delay(3000).reset();
+                        alert(message);
+                        window.location.reload(true);
+                    } else if(xn.is_number(code)) {
+                        alert(message);
+                        submit.button('reset');
+                    } else {
+                        alert(message);
+                        submit.button('reset');
+                    }
+                });
+                return false;
+            });
+        });
+        $('.delete-route').on('click',function () {
+            if(confirm('你确定要删除吗？')){
+                var action = $(this).data('url');
+                $.xpost(action, {}, function(code, message) {
+                    if(code == 0) {
+                        alert(message);
+                        window.location.reload();
+                    } else {
+                        alert(message);
+                    }
+                });
+            }
+        });
+    });
+
+</script>
+<?php include APP_PATH.'view/htm/footer.inc.htm'; ?>

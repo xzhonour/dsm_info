@@ -1,0 +1,181 @@
+<?php include APP_PATH.'view/htm/header.inc.htm'; ?>
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            标签管理
+        </h1>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="row">
+            <!-- left column -->
+            <div class="col-md-12">
+                <!-- general form elements -->
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">添加标签</h3>
+                    </div>
+                    <!-- /.box-header -->
+                    <!-- form start -->
+                    <form role="form" id="form" method="post" action="<?php echo url('tags-add'); ?>">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label for="name"><span class="text-red">* </span>标签名</label>
+                                <input type="text" class="form-control" id="name" name="name" placeholder="请输入你的标签名">
+                            </div>
+                            <div class="form-group">
+                                <label for="pid"><span class="text-red">* </span>父标签</label>
+                                <!--<select name="pid" class="form-control" id="gid">-->
+                                    <!--<?php foreach($tags as $k=>$v): ?>-->
+                                    <!--<option value="<?php echo $v['tid']; ?>" ><?php echo $v['name']; ?></option>-->
+                                    <!--<?php endforeach; ?>-->
+                                <!--</select>-->
+                                <input type="button" class="btn btn-success form-control" id="pidbtn" name="pidbutton" value="<?php echo empty($pres)?'选择(不选为根标签)':$pres['name']; ?>" >
+                                <input type="hidden"  id="pid" name="pid" value="<?php echo empty($pres)?'0':$pres['tid']; ?>">
+                                <div id="pidmenu" style="position: absolute;background: #fff;min-width: 150px;border:1px solid #ccc;display: none;">
+                                    <!-- left column -->
+                                        <table class="table table-hover" id="gtreetable" style="width: 100%">
+                                            <tbody>
+                                            <tr>
+                                                <td data-tid="0">根标签</td>
+                                            </tr>
+                                            <?php $i=0; foreach($tags as $v): ?>
+                                            <tr style="cursor: pointer;" data-tt-id="<?php echo $v['tid']; ?>" data-tt-parent-id="<?php echo $v['pid']; ?>" data-tt-branch='true'>
+                                                <td data-tid="<?php echo $v['tid']; ?>"><?php echo $v['name']; ?></td>
+                                            </tr>
+                                            <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="info">标签介绍</label>
+                                <textarea name="info" class="form-control" id="info"  rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="color"><span class="text-red">* </span>标签颜色</label>
+                                <input type="text"  class="form-control" id="color" data-control="hue" data-inline="true" value="#ff6161" name="color" placeholder="例如:#fff">
+                            </div>
+                            <div class="form-group">
+                                <label for="status"><span class="text-red">* </span>状态</label>
+                                <select name="status" class="form-control" id="status">
+                                    <option value="0">不显示</option>
+                                    <option value="1" selected>显示</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="sort">排序</label>
+                                <input type="text" class="form-control" name="sort" id="sort" value="0" placeholder="排序 数字越大 越靠前 最大999">
+                            </div>
+                        </div>
+                        <!-- /.box-body -->
+
+                        <div class="box-footer">
+                            <button type="submit" id="submit" class="btn btn-primary">添加</button>
+                            <button type="button" onclick="history.back()"  class="btn btn-warning">返回</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- /.box -->
+            </div>
+        </div>
+        <!-- /.row -->
+    </section>
+    <!-- /.content -->
+</div>
+<script>
+    $(function ($) {
+        $.require_css('<?php echo $conf["view_url"]; ?>bower_components/treetable/css/jquery.treetable.css')
+        $.require('<?php echo $conf["view_url"]; ?>bower_components/treetable/jquery.treetable.js',function () {
+            var url_rewrite_on = <?php echo $conf['url_rewrite_on']; ?>;
+            $("#gtreetable").treetable({
+                expandable: true,
+                expanderTemplate:'<a href="#">&nbsp;<i class="fa  fa-plus-square"></i> </a>',
+                stringCollapse:'关闭',
+                stringExpand:'展开',
+                clickableNodeNames:true,
+                onNodeExpand:function () {
+                    var url = (url_rewrite_on?'':'?')+'tags-list-'+this.id+'.htm';
+                    var parent_id = this.id;
+                    var parentNode = $("#gtreetable").treetable("node", parent_id);
+                    $.xpost(url,{tid:this.id},function (code,message) {
+                        if (xn.empty(message)) return;
+                        for (var i = 0;i < message.length;i++){
+                            var node = message[i];
+                            if(node['level'] == 4) return;
+                            if (!$("#gtreetable").treetable("node", node['tid']) && node['level'] !=4){
+                                var row ='<tr style="cursor: pointer;" data-tt-id="' + node['tid'] + '" data-tt-branch="true" '+' data-tt-parent-id="'+parent_id+'"';
+                                row += ' >';
+                                row += '<td data-tid="'+node['tid']+'">'+node['name']+'</td>';
+                                row +="</tr>";
+                                $("#gtreetable").treetable("loadBranch", parentNode, row);
+                            }
+                        }
+                    });
+                }
+            });
+        });
+        $('#pidbtn').on('click',function () {
+            $('#pidmenu').toggle("fast");
+        });
+        $('#pidmenu').on('click','td',function () {
+            var text = $(this).text();
+            var tid = $(this).data('tid');
+            $('#pidbtn').val(text);
+            $('#pid').val(tid);
+            var i = $(this).find('i.fa');
+            i.hasClass('fa-plus-square')?i.removeClass('fa-plus-square').addClass('fa-minus-square'):i.removeClass('fa-minus-square').addClass('fa-plus-square');
+
+            //
+        });
+
+        var login_form = $('#form');
+        var submit = $('#submit');
+        var referer = '/<?php echo url("tags-list"); ?>';
+        $.require('<?php echo $conf["view_url"]; ?>bower_components/xiuno/form.js',function () {
+            login_form.on('submit',function () {
+                login_form.reset();
+                submit.button('loading');
+                var postdata = login_form.serializeObject();
+                $.xpost(login_form.attr('action'), postdata, function(code, message) {
+                    if(code == 0) {
+                        submit.button(message).delay(1000).location(referer);
+                    } else if(xn.is_number(code)) {
+                        alert(message);
+                        submit.button('reset');
+                    } else {
+                        login_form.find('[name="'+code+'"]').alert(message).focus();
+                        submit.button('reset');
+                    }
+                });
+                return false;
+            });
+        });
+        $.require_css('<?php echo $conf["view_url"]; ?>bower_components/minicolors/jquery.minicolors.css');
+        $.require('<?php echo $conf["view_url"]; ?>bower_components/minicolors/jquery.minicolors.js',function () {
+            $('#color').minicolors({
+                control: $(this).attr('data-control') || 'hue',
+                defaultValue: $(this).attr('data-defaultValue') || '',
+                inline: $(this).attr('data-inline') === 'true',
+                letterCase: $(this).attr('data-letterCase') || 'lowercase',
+                opacity: $(this).attr('data-opacity'),
+                position: $(this).attr('data-position') || 'bottom left',
+                change: function(hex, opacity) {
+                    if (!hex)
+                        return;
+                    if (opacity)
+                        hex += ', ' + opacity;
+                    try {
+                        $(this).val(hex);
+                    } catch (e) {
+                        console.log(e);
+                    }
+                },
+                theme: 'bootstrap'
+            });
+        });
+    });
+</script>
+<?php include APP_PATH.'view/htm/footer.inc.htm'; ?>

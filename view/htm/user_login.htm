@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title><?php echo $conf['sitename'].' - 登录'; ?></title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <!-- Bootstrap 3.3.7 -->
+    <link rel="stylesheet" href="<?php echo $conf['view_url']; ?>bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="<?php echo $conf['view_url']; ?>bower_components/font-awesome/css/font-awesome.min.css">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="<?php echo $conf['view_url']; ?>bower_components/Ionicons/css/ionicons.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="<?php echo $conf['view_url']; ?>css/AdminLTE.min.css">
+</head>
+<body class="hold-transition login-page">
+<div class="login-box">
+    <div class="login-logo">
+        <a href="/"><?php echo $conf['sitename']; ?></a>
+    </div>
+    <!-- /.login-logo -->
+    <div class="login-box-body">
+        <p class="login-box-msg">登录你的账户进行操作</p>
+
+        <form action="<?php echo url('user-login'); ?>" method="post" id="login_form">
+            <div class="form-group has-feedback">
+                <input type="text" name="username" class="form-control"  placeholder="用户名/手机号">
+                <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+            </div>
+            <div class="form-group has-feedback">
+                <input type="password" name="password" class="form-control" placeholder="密码3-18位">
+                <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+            </div>
+            <div class="form-group has-feedback">
+                    <input type="text" name="validate_code" class="form-control"   placeholder="验证码">
+                    <span class="glyphicon  glyphicon-check form-control-feedback"></span>
+            </div>
+            <div class="form-group has-feedback">
+                <img style="display: block;width: 100%" title="点击切换验证码" id="validate_code" onclick="this.src = this.src+'?'+Math.random()" src="<?php echo url('tools-validate_code'); ?>" alt="验证码">
+            </div>
+
+            <div class="row">
+                <!-- /.col -->
+                <div class="col-xs-12">
+                    <button type="submit" id="submit" class="btn btn-primary btn-block btn-flat" >登录</button>
+                </div>
+                <!-- /.col -->
+            </div>
+        </form>
+    </div>
+    <!-- /.login-box-body -->
+</div>
+<!-- /.login-box -->
+
+<!-- jQuery 3 -->
+<script src="<?php echo $conf['view_url']; ?>bower_components/jquery/dist/jquery.min.js"></script>
+<!-- Bootstrap 3.3.7 -->
+<script src="<?php echo $conf['view_url']; ?>bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- xiuno -->
+<script src="<?php echo $conf['view_url']; ?>bower_components/xiuno/xiuno.js"></script>
+<script src="<?php echo $conf['view_url']; ?>bower_components/xiuno/form.js"></script>
+
+
+</body>
+</html>
+
+
+<script>
+    $(function ($) {
+        var login_form = $('#login_form');
+        var submit = $('#submit');
+        var referer = '/';
+        login_form.on('submit',function () {
+                login_form.reset();
+                submit.button('loading');
+                var postdata = login_form.serializeObject();
+                $.xpost(login_form.attr('action'), postdata, function(code, message) {
+                    if(code == 0) {
+                        submit.button(message).delay(1000).location(referer);
+                    } else if(xn.is_number(code)) {
+                        alert(message);
+                        submit.button('reset');
+                    } else {
+                        login_form.find('[name="'+code+'"]').alert(message).focus();
+                        submit.button('reset');
+                    }
+                    var src = $('#validate_code').prop('src');
+                    $('#validate_code').prop('src',src+'?'+Math.random());
+                });
+                return false;
+        });
+
+    });
+
+</script>

@@ -1,0 +1,70 @@
+<!-- Left side column. contains the logo and sidebar -->
+<aside class="main-sidebar">
+    <!-- sidebar: style can be found in sidebar.less -->
+    <section class="sidebar">
+        <!-- search form -->
+        <form action="<?php echo url('index-doc'); ?>" method="get" class="sidebar-form">
+            <div class="input-group">
+                <input type="text" name="w" value="<?php echo isset($w)?$w:''; ?>" class="form-control" placeholder="搜索...">
+                <span class="input-group-btn">
+                <button type="submit"  id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
+                </button>
+              </span>
+            </div>
+        </form>
+        <!-- /.search form -->
+        <!-- sidebar menu: : style can be found in sidebar.less -->
+        <ul class="sidebar-menu" data-widget="tree">
+            <li class="header">主导航</li>
+            <li class="<?php echo $route == 'index'?'active ':'' ?>treeview">
+                <a href="#">
+                    <i class="fa  fa-folder-o"></i> <span>文档管理</span>
+                    <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li <?php echo  in_array($action,['doc','','doc_step'])?' class="active"':''; ?>><a href="<?php echo url('index-doc'); ?>"><i class="fa fa-circle-o"></i>我的文档</a></li>
+                    <?php if($gid == $gid_default): ?>
+                    <li <?php echo  in_array($action,['doc_manage'])?' class="active"':''; ?>><a href="<?php echo url('index-doc_manage'); ?>"><i class="fa fa-circle-o"></i>文档管理</a></li>
+                    <?php endif; ?>
+                </ul>
+            </li>
+            <?php if($gid == $gid_default): ?>
+            <li class="<?php echo $route == 'user'?'active ':'' ?>treeview">
+                <a href="#">
+                    <i class="fa fa-users"></i> <span>用户管理</span>
+                    <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li <?php echo  in_array($action,['list','info'])?' class="active"':'' ?>>
+                        <a href="<?php echo url('user-list'); ?>"><i class="fa fa-circle-o"></i> 用户列表</a>
+                    </li>
+                    <li <?php echo $action == 'add'?' class="active"':'' ?>>
+                        <a href="<?php echo url('user-add'); ?>"><i class="fa fa-circle-o"></i> 添加用户</a>
+                    </li>
+                </ul>
+            </li>
+            <li class="<?php echo $route == 'tags'?'active ':'' ?>treeview">
+                <a href="#">
+                    <i class="fa fa-tags"></i> <span>标签管理</span>
+                    <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li <?php echo  in_array($action,['list'])?' class="active"':'' ?>>
+                    <a href="<?php echo url('tags-list'); ?>"><i class="fa fa-circle-o"></i> 标签列表</a>
+                    </li>
+                    <!--<li <?php echo $action == 'add'?' class="active"':'' ?>>-->
+                    <!--<a href="<?php echo url('user-add'); ?>"><i class="fa fa-circle-o"></i> 添加标签</a>-->
+                    <!--</li>-->
+                </ul>
+            </li>
+            <?php endif; ?>
+        </ul>
+    </section>
+    <!-- /.sidebar -->
+</aside>

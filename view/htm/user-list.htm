@@ -1,0 +1,91 @@
+<?php include APP_PATH.'view/htm/header.inc.htm'; ?>
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            <i class="fa fa-th-list"></i>
+            用户列表
+        </h1>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <!-- /.row -->
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title"></h3>
+                        <!--<div class="box-tools">-->
+                            <!--<div class="input-group input-group-sm" style="width: 150px;">-->
+                                <!--<input type="text" name="table_search" class="form-control pull-right" placeholder="Search">-->
+
+                                <!--<div class="input-group-btn">-->
+                                    <!--<button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>-->
+                                <!--</div>-->
+                            <!--</div>-->
+                        <!--</div>-->
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover">
+                            <tr>
+                                <th>#</th>
+                                <th>用户名</th>
+                                <th>手机号</th>
+                                <th>用户组</th>
+                                <th>登录时间</th>
+                                <th>操作</th>
+                            </tr>
+                            <?php $i=0; foreach($users as $v): ?>
+                            <tr>
+                                <td><?php echo ++$i; ?></td>
+                                <td><?php echo $v['username']; ?></td>
+                                <td><?php echo $v['mobile']; ?></td>
+                                <td><span class="label <?php
+                                    switch($v['gid']):
+                                        case -1: echo 'label-danger'; break;
+                                        case 0: echo 'label-success'; break;
+                                        case 1: echo 'label-primary'; break;
+                                        case 2: echo 'label-warning'; break;
+                                        endswitch;
+                                 ?>"><?php echo $conf['groups'][$v['gid']].($user['uid'] == $v['uid']?'(当前用户)':''); ?></span>
+                                </td>
+                                <td><?php echo date('Y-m-d H:i',$v['login_date']); ?></td>
+                                <td>
+                                    <a href="<?php echo url('user-info-'.$v['uid']); ?>" class="btn btn-warning btn-sm">修改</a>
+                                    <?php if($user['uid'] != $v['uid']): ?>
+                                    <a href="javascript:;" data-url="<?php echo url('user-del-'.$v['uid']); ?>"  class="btn btn-danger delete-user btn-sm">删除</a>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </table>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+</div>
+<script>
+    $(function ($) {
+        $('.delete-user').on('click',function () {
+            if(confirm('你确定要删除吗？')){
+                var action = $(this).data('url');
+                $.xpost(action, {}, function(code, message) {
+                    if(code == 0) {
+                        alert(message);
+                        window.location.reload();
+                    } else {
+                        alert(message);
+                    }
+                });
+            }
+        });
+    });
+</script>
+<?php include APP_PATH.'view/htm/footer.inc.htm'; ?>
